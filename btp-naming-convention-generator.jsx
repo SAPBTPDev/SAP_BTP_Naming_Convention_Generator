@@ -179,7 +179,6 @@ export default function App() {
   const [envRows, setEnvRows] = useState([
     { env: "Dev", sid: "S42", tid: "DEV" },
     { env: "Test", sid: "S43", tid: "QA" },
-    { env: "Pre-Prod", sid: "S44", tid: "PRD" },
     { env: "Prod", sid: "S49", tid: "PRD" },
   ]);
   const [selected, setSelected] = useState(() => new Set());
@@ -362,7 +361,7 @@ export default function App() {
   /* --------------------------------------------------------------------- */
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header */}
         <header className="mb-6">
           <div className="flex items-center gap-2 text-indigo-700">
@@ -375,9 +374,9 @@ export default function App() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* LEFT: setup + selection */}
-          <div className="lg:col-span-1 space-y-5">
+          <div className="lg:col-span-2 space-y-5">
             {/* Project */}
             <section className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Project</h2>
@@ -560,20 +559,22 @@ export default function App() {
                               <div className="text-sm font-medium text-slate-800">{it.name}</div>
                               <code className="text-[11px] text-slate-400 font-mono truncate">{it.convention}</code>
                             </div>
-                            <div className="mt-1.5 flex flex-wrap gap-2">
+                            <div className="mt-1.5 space-y-1">
                               {it.rows.map((r, i) => (
-                                <div key={i} className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg py-1 pl-2 pr-1">
+                                <div key={i} className="flex items-center gap-2">
                                   {r.env && (
-                                    <span className="shrink-0 text-[10px] font-medium text-indigo-700 bg-indigo-100 rounded px-1.5 py-0.5">
+                                    <span className="shrink-0 text-[10px] font-medium text-indigo-700 bg-indigo-50 rounded px-1.5 py-0.5 w-24 text-center truncate">
                                       {r.env}
                                     </span>
                                   )}
-                                  <code className="text-[13px] font-mono text-slate-900">{r.result}</code>
+                                  <code className="flex-1 text-[13px] font-mono text-slate-900 bg-slate-50 rounded px-2 py-1 truncate">
+                                    {r.result}
+                                  </code>
                                   <button
                                     onClick={() => { copyText(r.result); flash(it.id + i); }}
-                                    className="shrink-0 grid place-items-center h-5 w-5 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200"
+                                    className="shrink-0 grid place-items-center h-6 w-6 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
                                   >
-                                    {copied === it.id + i ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                                    {copied === it.id + i ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                                   </button>
                                 </div>
                               ))}
