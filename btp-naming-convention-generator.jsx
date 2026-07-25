@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { Copy, Check, Download, Plus, Trash2, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 
 /* ----------------------------------------------------------------------------
@@ -173,7 +173,8 @@ function copyText(t) {
 
 /* ====================================================================== */
 export default function App() {
-  const [projectInput, setProjectInput] = useState("HSE IFMS");
+  const CATALOG_NAME = "Google";
+  const [projectInput, setProjectInput] = useState("Google");
   const [shortForm, setShortForm] = useState("");
   const [envRows, setEnvRows] = useState([
     { env: "Dev", sid: "S42", tid: "DEV" },
@@ -184,7 +185,7 @@ export default function App() {
   const [selected, setSelected] = useState(() => new Set());
   const [mode, setMode] = useState("scaffold");
   const [varValues, setVarValues] = useState({});
-  const [collapsed, setCollapsed] = useState(() => new Set());
+  const [collapsed, setCollapsed] = useState(() => new Set(CATALOG.map((a) => `${a.tab}/${a.family}`)));
   const [copied, setCopied] = useState("");
 
   /* --- prefix engine --- */
@@ -286,34 +287,35 @@ export default function App() {
   const flash = (id) => { setCopied(id); setTimeout(() => setCopied(""), 1100); };
 
   /* --- xlsx export --- */
-  const exportXlsx = () => {
-    const wb = XLSX.utils.book_new();
-    const cover = [
-      ["SAP BTP Naming Convention"],
-      ["Generated", new Date().toLocaleString()],
-      ["Catalog", "HSE IFMS BTP Naming Convention (V1.0)"],
-      ["Mode", mode === "resolve" ? "Resolved names" : "Scaffold (with examples)"],
-      [],
-      ["Project prefix forms"],
-      ["Title (display)", prefix.pt],
-      ["Upper (joined)", prefix.pu],
-      ["Lower (joined)", prefix.pl],
-      ["Short", prefix.ps],
-      [],
-      ["Environment map"],
-      ["Environment", "SID", "TID"],
-      ...envRows.map((r) => [r.env, r.sid, r.tid]),
-    ];
-    const cws = XLSX.utils.aoa_to_sheet(cover);
-    cws["!cols"] = [{ wch: 20 }, { wch: 42 }, { wch: 14 }];
-    XLSX.utils.book_append_sheet(wb, cws, "Project");
+  const exportXlsx = async () => {
+    const wb = new ExcelJS.Workbook();
 
+    // Cover / project sheet
+    const cover = wb.addWorksheet("Project");
+    cover.columns = [{ width: 20 }, { width: 42 }, { width: 14 }];
+    cover.addRow(["SAP BTP Naming Convention"]).font = { bold: true, size: 14 };
+    cover.addRow(["Generated", new Date().toLocaleString()]);
+    cover.addRow(["Catalog", `${CATALOG_NAME} BTP Naming Convention (V1.0)`]);
+    cover.addRow(["Mode", mode === "resolve" ? "Resolved names" : "Scaffold (with examples)"]);
+    cover.addRow([]);
+    cover.addRow(["Project prefix forms"]).font = { bold: true };
+    cover.addRow(["Title (display)", prefix.pt]);
+    cover.addRow(["Upper (joined)", prefix.pu]);
+    cover.addRow(["Lower (joined)", prefix.pl]);
+    cover.addRow(["Short", prefix.ps]);
+    cover.addRow([]);
+    cover.addRow(["Environment map"]).font = { bold: true };
+    cover.addRow(["Environment", "SID", "TID"]);
+    envRows.forEach((r) => cover.addRow([r.env, r.sid, r.tid]));
+
+    // One Excel Table per tab — Turquoise, Table Style Medium 12
+    let ti = 0;
     for (const t of generatedByTab) {
-      const aoa = [["Family / Group", "Artifact", "Environment", "Naming Convention", "Result", "Notes"]];
+      const rows = [];
       for (const f of t.families) {
         for (const it of f.items) {
           it.rows.forEach((r, idx) => {
-            aoa.push([
+            rows.push([
               idx === 0 ? f.family : "",
               idx === 0 ? it.name : "",
               r.env,
@@ -324,14 +326,24 @@ export default function App() {
           });
         }
       }
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws["!cols"] = [{ wch: 26 }, { wch: 30 }, { wch: 16 }, { wch: 34 }, { wch: 40 }, { wch: 44 }];
       const safe = t.tab.replace(/[\\/*?:\[\]]/g, "").slice(0, 31);
-      XLSX.utils.book_append_sheet(wb, ws, safe);
+      const ws = wb.addWorksheet(safe);
+      ws.addTable({
+        name: `Tbl_${ti++}`,
+        ref: "A1",
+        headerRow: true,
+        style: { theme: "TableStyleMedium12", showRowStripes: true },
+        columns: [
+          { name: "Family / Group" }, { name: "Artifact" }, { name: "Environment" },
+          { name: "Naming Convention" }, { name: "Result" }, { name: "Notes" },
+        ],
+        rows: rows.length ? rows : [["", "", "", "", "", ""]],
+      });
+      [26, 30, 16, 34, 40, 44].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
     }
 
-    const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = `${prefix.pu}_BTP_Naming_Convention.xlsx`;
@@ -354,12 +366,12 @@ export default function App() {
         {/* Header */}
         <header className="mb-6">
           <div className="flex items-center gap-2 text-indigo-700">
-            <div className="h-7 w-7 rounded-md bg-indigo-600 text-white grid place-items-center font-bold text-sm">N</div>
+            <div className="rounded-md bg-indigo-600 text-white px-2 py-1 font-bold text-sm tracking-wide">SAP BTP</div>
             <h1 className="text-xl font-semibold tracking-tight text-slate-900">BTP Naming Convention Generator</h1>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Pick a project prefix and the artifacts you need — get a governed naming sheet.
-            Catalog: HSE IFMS V1.0.
+            Catalog: {CATALOG_NAME} V1.0.
           </p>
         </header>
 
