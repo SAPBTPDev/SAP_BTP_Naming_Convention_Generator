@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import ExcelJS from "exceljs";
 import { Copy, Check, Download, Plus, Trash2, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 
@@ -172,6 +172,33 @@ function copyText(t) {
 }
 
 /* ====================================================================== */
+const STYLE = `
+.bg-aurora{
+  background:
+    radial-gradient(1100px 560px at 6% -14%, #e0e7ff 0%, rgba(224,231,255,0) 58%),
+    radial-gradient(1000px 520px at 106% -8%, #cffafe 0%, rgba(207,250,254,0) 54%),
+    radial-gradient(900px 720px at 50% 122%, #ede9fe 0%, rgba(237,233,254,0) 55%),
+    #eef2f7;
+  background-attachment: fixed;
+}
+.card{ transition: transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s ease; will-change: transform; }
+.card:hover{ transform: translateY(-4px); box-shadow: 0 24px 48px -20px rgba(30,41,59,.38); }
+.glass{ background: rgba(255,255,255,.72); backdrop-filter: blur(12px) saturate(1.4); -webkit-backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 12px 32px -20px rgba(30,41,59,.45); }
+.tilt{ transform: perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transition: transform .18s ease; transform-style: preserve-3d; }
+.logo3d{ background: linear-gradient(135deg,#6366f1,#4338ca); box-shadow: 0 8px 20px -6px rgba(67,56,202,.6), inset 0 1px 0 rgba(255,255,255,.35); }
+@keyframes sectionIn{ from{ opacity:0; transform: translateY(16px) scale(.985);} to{ opacity:1; transform:none;} }
+.section-in{ animation: sectionIn .5s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes fadeIn{ from{ opacity:0; transform: translateY(6px);} to{ opacity:1; transform:none;} }
+.fade-in{ animation: fadeIn .3s ease both; }
+@keyframes popz{ 0%{ transform: scale(1);} 45%{ transform: scale(1.35);} 100%{ transform: scale(1);} }
+.pop{ animation: popz .32s ease; }
+.rowh{ transition: background .15s ease; }
+.rowh:hover{ background:#f8fafc; }
+@media (prefers-reduced-motion: reduce){
+  .card,.tilt,.section-in,.fade-in,.pop{ animation: none !important; transition: none !important; transform: none !important; }
+}
+`;
+
 export default function App() {
   const CATALOG_NAME = "Google";
   const [projectInput, setProjectInput] = useState("Google");
@@ -360,12 +387,13 @@ export default function App() {
 
   /* --------------------------------------------------------------------- */
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans">
+    <div className="min-h-screen bg-aurora text-slate-800 font-sans">
+      <style>{STYLE}</style>
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header */}
         <header className="mb-6">
           <div className="flex items-center gap-2 text-indigo-700">
-            <div className="rounded-md bg-indigo-600 text-white px-2 py-1 font-bold text-sm tracking-wide">SAP BTP</div>
+            <Tilt max={18}><div className="rounded-md logo3d text-white px-2.5 py-1 font-bold text-sm tracking-wide">SAP BTP</div></Tilt>
             <h1 className="text-xl font-semibold tracking-tight text-slate-900">BTP Naming Convention Generator</h1>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -378,7 +406,7 @@ export default function App() {
           {/* LEFT: setup + selection */}
           <div className="lg:col-span-2 space-y-5">
             {/* Project */}
-            <section className="bg-white rounded-xl border border-slate-200 p-4">
+            <section className="card bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Project</h2>
               <label className="block text-sm font-medium text-slate-700 mb-1">Project name or prefix</label>
               <input
@@ -407,7 +435,7 @@ export default function App() {
             </section>
 
             {/* Environments */}
-            <section className="bg-white rounded-xl border border-slate-200 p-4">
+            <section className="card bg-white rounded-xl border border-slate-200 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Environments</h2>
                 <button
@@ -439,7 +467,7 @@ export default function App() {
             </section>
 
             {/* Selection */}
-            <section className="bg-white rounded-xl border border-slate-200 p-4">
+            <section className="card bg-white rounded-xl border border-slate-200 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Artifacts</h2>
                 <div className="flex gap-3 text-xs">
@@ -470,7 +498,7 @@ export default function App() {
                             </button>
                           </div>
                           {!isColl && (
-                            <div className="px-2 pb-2 space-y-0.5">
+                            <div className="px-2 pb-2 space-y-0.5 fade-in">
                               {f.items.map((it) => (
                                 <label key={it.id} className="flex items-center gap-2 pl-5 py-0.5 cursor-pointer group">
                                   <input type="checkbox" checked={selected.has(it.id)} onChange={() => toggleArtifact(it.id)}
@@ -492,7 +520,7 @@ export default function App() {
           {/* RIGHT: mode + output */}
           <div className="lg:col-span-3 space-y-5">
             {/* Toolbar */}
-            <div className="bg-white rounded-xl border border-slate-200 p-3 flex flex-wrap items-center gap-3 sticky top-3 z-10">
+            <div className="glass rounded-xl border border-slate-200 p-3 flex flex-wrap items-center gap-3 sticky top-3 z-10">
               <div className="inline-flex rounded-lg bg-slate-100 p-0.5">
                 <ModeBtn active={mode === "scaffold"} onClick={() => setMode("scaffold")}>Scaffold</ModeBtn>
                 <ModeBtn active={mode === "resolve"} onClick={() => setMode("resolve")}>Resolve</ModeBtn>
@@ -514,7 +542,7 @@ export default function App() {
 
             {/* Resolve inputs */}
             {mode === "resolve" && selected.size > 0 && (
-              <section className="bg-white rounded-xl border border-slate-200 p-4">
+              <section className="card bg-white rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center gap-1.5 mb-3 text-slate-500">
                   <Sparkles size={15} className="text-indigo-500" />
                   <h2 className="text-xs font-semibold uppercase tracking-wide">Values for your selection</h2>
@@ -540,12 +568,14 @@ export default function App() {
 
             {/* Output */}
             {selected.size === 0 ? (
-              <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-400">
-                Select artifacts on the left to generate the naming sheet.
-              </div>
+              <Tilt max={10}>
+                <div className="card section-in bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-400">
+                  Select artifacts on the left to generate the naming sheet.
+                </div>
+              </Tilt>
             ) : (
-              generatedByTab.map((t) => (
-                <section key={t.tab} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              generatedByTab.map((t, ti) => (
+                <section key={t.tab} style={{ animationDelay: `${ti * 80}ms` }} className="card section-in bg-white rounded-xl border border-slate-200 overflow-hidden">
                   <div className="px-4 py-2.5 bg-slate-800 text-white text-sm font-semibold">{t.tab}</div>
                   {t.families.map((f) => (
                     <div key={f.family}>
@@ -554,7 +584,7 @@ export default function App() {
                       </div>
                       <div className="divide-y divide-slate-100">
                         {f.items.map((it) => (
-                          <div key={it.id} className="px-4 py-3">
+                          <div key={it.id} className="px-4 py-3 rowh">
                             <div className="flex items-baseline justify-between gap-3">
                               <div className="text-sm font-medium text-slate-800">{it.name}</div>
                               <code className="text-[11px] text-slate-400 font-mono truncate">{it.convention}</code>
@@ -572,7 +602,7 @@ export default function App() {
                                   </code>
                                   <button
                                     onClick={() => { copyText(r.result); flash(it.id + i); }}
-                                    className="shrink-0 grid place-items-center h-6 w-6 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
+                                    className={"shrink-0 grid place-items-center h-6 w-6 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100 " + (copied === it.id + i ? "pop" : "")}
                                   >
                                     {copied === it.id + i ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                                   </button>
@@ -596,6 +626,27 @@ export default function App() {
 }
 
 /* ---- small components ------------------------------------------------ */
+function Tilt({ children, className = "", max = 8, style }) {
+  const ref = useRef(null);
+  const move = (e) => {
+    const el = ref.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.setProperty("--ry", `${px * max}deg`);
+    el.style.setProperty("--rx", `${-py * max}deg`);
+  };
+  const leave = () => {
+    const el = ref.current; if (!el) return;
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--ry", "0deg");
+  };
+  return (
+    <div ref={ref} onMouseMove={move} onMouseLeave={leave} style={style} className={"tilt " + className}>
+      {children}
+    </div>
+  );
+}
 function PrefixChip({ label, value }) {
   return (
     <div>
