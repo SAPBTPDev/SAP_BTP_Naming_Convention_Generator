@@ -462,16 +462,7 @@ function App() {
                   />
                 </div>
               </div>
-              <div className="mt-3">
-  <label className="block text-xs font-medium text-slate-500 mb-1">Backend system</label>
-  <input
-    value={backendInput}
-    onChange={(e) => setBackendInput(e.target.value)}
-    placeholder="S4"
-    className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-  />
-  <p className="text-[11px] text-slate-400 mt-1">Used in destinations, actions, and other backend-bound artifacts.</p>
-</div>
+             
               <p className="text-[11px] text-slate-400 mt-2">
                 Short defaults to the last word, lowercased. Override it if your team uses a set abbreviation.
               </p>
@@ -507,6 +498,16 @@ function App() {
                   </div>
                 ))}
               </div>
+               <div className="mt-3">
+  <label className="block text-xs font-medium text-slate-500 mb-1">Backend system</label>
+  <input
+    value={backendInput}
+    onChange={(e) => setBackendInput(e.target.value)}
+    placeholder="S4"
+    className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  />
+  <p className="text-[11px] text-slate-400 mt-1">Used in destinations, actions, and other backend-bound artifacts.</p>
+</div>
             </section>
 
             {/* Selection */}
