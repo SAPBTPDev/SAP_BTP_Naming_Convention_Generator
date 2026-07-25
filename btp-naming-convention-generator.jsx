@@ -362,7 +362,7 @@ export default function App() {
   /* --------------------------------------------------------------------- */
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans">
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <header className="mb-6">
           <div className="flex items-center gap-2 text-indigo-700">
@@ -375,7 +375,7 @@ export default function App() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
           {/* LEFT: setup + selection */}
           <div className="lg:col-span-1 space-y-5">
             {/* Project */}
@@ -457,7 +457,7 @@ export default function App() {
                       const ck = `${t.tab}/${f.family}`;
                       const isColl = collapsed.has(ck);
                       return (
-                        <div key={f.family} className="mb-1.5 rounded-lg border border-slate-150 bg-slate-50">
+                        <div key={f.family} className="mb-1.5 rounded-lg border border-slate-200 bg-slate-50">
                           <div className="flex items-center gap-2 px-2 py-1.5">
                             <TriBox state={st} onClick={() => toggleFamily(f.items)} />
                             <button className="flex-1 text-left text-sm font-medium text-slate-700 truncate" onClick={() => toggleFamily(f.items)}>
@@ -491,7 +491,7 @@ export default function App() {
           </div>
 
           {/* RIGHT: mode + output */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="lg:col-span-3 space-y-5">
             {/* Toolbar */}
             <div className="bg-white rounded-xl border border-slate-200 p-3 flex flex-wrap items-center gap-3 sticky top-3 z-10">
               <div className="inline-flex rounded-lg bg-slate-100 p-0.5">
@@ -550,7 +550,7 @@ export default function App() {
                   <div className="px-4 py-2.5 bg-slate-800 text-white text-sm font-semibold">{t.tab}</div>
                   {t.families.map((f) => (
                     <div key={f.family}>
-                      <div className="px-4 py-1.5 bg-slate-50 border-y border-slate-150 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <div className="px-4 py-1.5 bg-slate-50 border-y border-slate-200 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                         {f.family}
                       </div>
                       <div className="divide-y divide-slate-100">
@@ -560,22 +560,20 @@ export default function App() {
                               <div className="text-sm font-medium text-slate-800">{it.name}</div>
                               <code className="text-[11px] text-slate-400 font-mono truncate">{it.convention}</code>
                             </div>
-                            <div className="mt-1.5 space-y-1">
+                            <div className="mt-1.5 flex flex-wrap gap-2">
                               {it.rows.map((r, i) => (
-                                <div key={i} className="flex items-center gap-2">
+                                <div key={i} className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg py-1 pl-2 pr-1">
                                   {r.env && (
-                                    <span className="shrink-0 text-[10px] font-medium text-indigo-700 bg-indigo-50 rounded px-1.5 py-0.5 w-24 text-center truncate">
+                                    <span className="shrink-0 text-[10px] font-medium text-indigo-700 bg-indigo-100 rounded px-1.5 py-0.5">
                                       {r.env}
                                     </span>
                                   )}
-                                  <code className="flex-1 text-[13px] font-mono text-slate-900 bg-slate-50 rounded px-2 py-1 truncate">
-                                    {r.result}
-                                  </code>
+                                  <code className="text-[13px] font-mono text-slate-900">{r.result}</code>
                                   <button
                                     onClick={() => { copyText(r.result); flash(it.id + i); }}
-                                    className="shrink-0 grid place-items-center h-6 w-6 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
+                                    className="shrink-0 grid place-items-center h-5 w-5 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200"
                                   >
-                                    {copied === it.id + i ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                                    {copied === it.id + i ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
                                   </button>
                                 </div>
                               ))}
